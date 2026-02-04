@@ -4,206 +4,320 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Friends! Noonsong – Technical Write-up</title>
-  <style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                 Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue",
-                 Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 40px;
-    background-color: #fafafa;
-    color: #222;
-  }
-
-  h1 {
-    font-size: 2.2rem;
-    margin-bottom: 0.2em;
-  }
-
-  h2 {
-    font-size: 1.4rem;
-    margin-top: 2em;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.3em;
-  }
-
-  h3 {
-    font-size: 1.1rem;
-    margin-top: 1.5em;
-  }
-
-  p {
-    max-width: 720px;
-    margin: 0.6em 0;
-  }
-
-  ul {
-    max-width: 720px;
-    padding-left: 20px;
-  }
-
-  li {
-    margin: 0.4em 0;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #ddd;
-    margin: 2em 0;
-  }
-
-  details {
-    max-width: 720px;
-    margin: 1em 0;
-    background: #fff;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-  }
-
-  summary {
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  img {
-    max-width: 720px;
-    width: 100%;
-    margin: 1em 0;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-  }
-
-  a {
-    color: #0366d6;
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
-  }
-</style>
-
+  <link rel="stylesheet" href="../assets/css/main.css" />
 </head>
 <body>
-  
+  <div class="container">
+    <!-- Language Toggle -->
+    <div class="lang-toggle" aria-label="Language toggle">
+      <button id="btn-en" type="button" onclick="setLang('en')">EN</button>
+      <button id="btn-kr" type="button" onclick="setLang('kr')">KR</button>
+    </div>
+
+    <!-- Header -->
+    <h1>
+      <span class="lang en">Friends Noonsong – Technical Write-up</span>
+      <span class="lang kr">프렌즈 눈송 – 기술 정리 (GitHub Pages)</span>
+    </h1>
+
+    <p class="meta">
+      <span class="lang en">Unity Client · Team Project</span>
+      <span class="lang kr">Unity Client · 팀 프로젝트</span>
+    </p>
+
+    <p>
+      <span class="pill">Unity</span>
+      <span class="pill">AR Foundation</span>
+      <span class="pill">GPS/Zone Spawn</span>
+      <span class="pill">Collection System</span>
+    </p>
+
+    <hr />
+
+    <!-- Overview -->
+    <h2>
+      <span class="lang en">Overview</span>
+      <span class="lang kr">프로젝트 개요</span>
+    </h2>
+
+    <p class="lang en">
+      <b>Friends Noonsong</b> is a GPS-based AR collection game where different mascots appear
+      around department buildings. This page focuses on my key contributions:
+      integrating the spawn system with AR collection and stabilizing issues found after beta testing.
+    </p>
+
+    <p class="lang kr">
+      <b>프렌즈 눈송</b>은 GPS 기반 AR 수집 게임으로, 학과 건물별로 다른 마스코트가 출현합니다.
+      이 페이지는 제가 가장 핵심적으로 담당한 내용인
+      <b>스폰 시스템 ↔ AR 수집 ↔ 도감(컬렉션) 연동</b>과
+      <b>베타 테스트 이후 안정화</b>를 중심으로 정리합니다.
+    </p>
+
+    <div class="note">
+      <p class="lang en">
+        <b>My Role:</b> AR collection logic, mapping spawned objects to data entries, collection registration,
+        and post-beta stabilization (duplicate spawns / inconsistent states / interaction issues).
+      </p>
+      <p class="lang kr">
+        <b>내 역할:</b> AR 수집 로직, 스폰된 오브젝트와 데이터 엔트리 매핑, 수집/도감 등록,
+        베타 이후 안정화(중복 소환/상태 불일치/상호작용 문제).
+      </p>
+    </div>
+
+    <!-- Optional Images -->
+    <h2>
+      <span class="lang en">Screenshots (Optional)</span>
+      <span class="lang kr">스크린샷 (선택)</span>
+    </h2>
+
+    <p class="lang en">
+      If you have screenshots, place them in <code>/images</code> and update the filenames below.
+      (You can also delete this section if you don’t want images.)
+    </p>
+
+    <p class="lang kr">
+      스크린샷이 있다면 <code>/images</code> 폴더에 넣고 아래 파일명을 바꿔주세요.
+      (이미지 넣기 싫으면 이 섹션을 삭제해도 됩니다.)
+    </p>
+
+    <!-- Replace these with your actual images -->
+    <img src="images/ar_capture.png" alt="AR scene capture (replace this file)" />
+    <div class="caption">
+      <span class="lang en">AR scene: a spawned character visible on screen.</span>
+      <span class="lang kr">AR 화면: 스폰된 캐릭터가 화면에 표시된 장면.</span>
+    </div>
+
+    <img src="images/collection_capture.png" alt="Collection/encyclopedia capture (replace this file)" />
+    <div class="caption">
+      <span class="lang en">After collection: registered in the collection/encyclopedia UI.</span>
+      <span class="lang kr">수집 후: 도감(컬렉션) UI에 등록된 화면.</span>
+    </div>
+
+    <hr />
+
+    <!-- 1) Integration -->
+    <h2>
+      <span class="lang en">1. Integrating GPS Spawn System with AR Collection</span>
+      <span class="lang kr">1. GPS 스폰 시스템과 AR 수집/도감 연동</span>
+    </h2>
+
+    <h3>
+      <span class="lang en">Background</span>
+      <span class="lang kr">배경</span>
+    </h3>
+
+    <p class="lang en">
+      The spawn system and AR collection system were initially developed as separate parts.
+      The spawn logic activated when the player entered a building zone and spawned a mascot near the player.
+      My task was to connect spawned AR objects to the collection data flow (collect → register → update UI).
+    </p>
+
+    <p class="lang kr">
+      스폰 로직(GPS/건물 존 기반)과 AR 수집/도감 로직이 서로 분리된 채로 구현되어 있었고,
+      이를 하나의 게임 흐름(스폰 → AR 화면 인식 → 수집 → 도감 등록)으로 통합하는 과정이
+      가장 큰 난이도였습니다.
+    </p>
+
+    <h3>
+      <span class="lang en">Understanding Existing Spawn Logic</span>
+      <span class="lang kr">기존 스폰 구조 파악</span>
+    </h3>
+
+    <p class="lang en">
+      Buildings were divided into rectangular zones. When the player entered a zone,
+      a script became active and started spawning building-specific mascots.
+      Each mascot was defined as a ScriptableObject entry containing metadata
+      such as spawn building name, prefab reference, and discovery state.
+    </p>
+
+    <p class="lang kr">
+      건물 좌표 영역을 사각형 존으로 분할해두고, 유저가 해당 존에 들어가면 스크립트가 활성화되어
+      건물별로 다른 눈송이가 스폰되는 구조였습니다. 눈송이 데이터는 ScriptableObject 엔트리로 관리되고,
+      각 엔트리에는 출현 건물명과 프리팹, 발견 상태 등이 포함되어 있었습니다.
+    </p>
+
+    <h3>
+      <span class="lang en">Core Problems</span>
+      <span class="lang kr">발생한 핵심 문제</span>
+    </h3>
+
+    <ul class="lang en">
+      <li>Objects were visible but could not be collected (interaction target mismatch)</li>
+      <li>Collected entries were registered, but objects remained in the world (state inconsistency)</li>
+      <li>Duplicate spawns occurred during respawn cycles</li>
+      <li>Incorrect scale/rotation in AR view (too small, not facing camera)</li>
+    </ul>
+
+    <ul class="lang kr">
+      <li>화면에 보이는데 수집이 안 됨 (타겟 판별/상호작용 불일치)</li>
+      <li>도감에는 등록되는데 월드 오브젝트가 사라지지 않음 (상태 불일치)</li>
+      <li>리젠 타이밍에서 중복 스폰 발생</li>
+      <li>AR에서 너무 작게 보이거나 정면을 바라보지 않는 회전/스케일 문제</li>
+    </ul>
+
+    <h3>
+      <span class="lang en">Solutions</span>
+      <span class="lang kr">해결 방향</span>
+    </h3>
+
+    <ul class="lang en">
+      <li>Implemented screen-visibility-based targeting for AR collection (only visible objects are targetable)</li>
+      <li>Mapped spawned GameObjects to data entries (GameObject ↔ Entry) to keep a single source of truth</li>
+      <li>Standardized collection processing order (register → remove → UI update) to prevent inconsistencies</li>
+      <li>Added destruction checks in respawn logic to prevent duplicate spawns</li>
+    </ul>
+
+    <ul class="lang kr">
+      <li>AR 화면 가시성 기반 타겟팅 로직으로 “보이는 오브젝트만” 수집 대상으로 지정</li>
+      <li>스폰된 GameObject와 데이터 엔트리를 1:1로 매핑하여 단일 기준(Single Source of Truth) 유지</li>
+      <li>수집 처리 순서(등록 → 제거 → UI 갱신)를 고정해 상태 불일치 방지</li>
+      <li>리젠(20초 주기)에서 오브젝트 Destroy 여부 체크를 추가해 중복 스폰 방지</li>
+    </ul>
+
+    <h3>
+      <span class="lang en">Result</span>
+      <span class="lang kr">결과</span>
+    </h3>
+
+    <p class="lang en">
+      By unifying interaction targeting and state flow, I successfully integrated
+      GPS-based spawning with AR collection and collection registration into a stable gameplay loop.
+    </p>
+
+    <p class="lang kr">
+      타겟 선정 기준과 상태 흐름을 통합하여, GPS 기반 스폰과 AR 수집/도감 등록을
+      하나의 안정적인 게임 루프로 연결했습니다.
+    </p>
+
+    <!-- Optional: small code snippet (folded) -->
+    <div class="note">
+      <p class="lang en"><b>Optional snippet:</b> example of screen visibility check (simplified).</p>
+      <p class="lang kr"><b>선택 코드:</b> 화면 가시성 체크(단순화) 예시.</p>
+      <pre>
+// World -> Screen visibility check (simplified)
+Vector3 sp = Camera.main.WorldToScreenPoint(worldPoint);
+bool visible =
+  sp.z > 0 &&
+  sp.x > -50 && sp.x < Screen.width + 50 &&
+  sp.y > -50 && sp.y < Screen.height + 50;
+      </pre>
+    </div>
+
+    <hr />
+
+    <!-- 2) Beta Stabilization -->
+    <h2>
+      <span class="lang en">2. Stabilizing AR Collection After Beta Test</span>
+      <span class="lang kr">2. 베타 테스트 이후 AR 수집 안정화</span>
+    </h2>
+
+    <h3>
+      <span class="lang en">Issues Found</span>
+      <span class="lang kr">베타에서 확인된 문제</span>
+    </h3>
+
+    <ul class="lang en">
+      <li>Visible objects were sometimes not collectible</li>
+      <li>Objects duplicated after respawn cycles</li>
+      <li>Collection state and world state became inconsistent</li>
+    </ul>
+
+    <ul class="lang kr">
+      <li>보이는데 안 잡히는 문제</li>
+      <li>리젠 후 중복 오브젝트 생성</li>
+      <li>도감(데이터)과 월드(오브젝트) 상태 불일치</li>
+    </ul>
+
+    <h3>
+      <span class="lang en">Root Cause</span>
+      <span class="lang kr">원인</span>
+    </h3>
+
+    <p class="lang en">
+      Multiple systems were managing object state independently (spawn timing, AR targeting, collection registration).
+      In AR environments, this quickly leads to inconsistent behavior unless the state flow is strictly unified.
+    </p>
+
+    <p class="lang kr">
+      스폰 타이밍, AR 타겟팅, 수집/도감 등록이 서로 다른 기준으로 상태를 관리하고 있어
+      AR 환경에서는 작은 불일치가 바로 UX 버그로 드러났습니다.
+    </p>
+
+    <h3>
+      <span class="lang en">Fixes Applied</span>
+      <span class="lang kr">수정 내용</span>
+    </h3>
+
+    <ul class="lang en">
+      <li>Unified target selection into a single source (currentTarget)</li>
+      <li>Standardized the collection pipeline order</li>
+      <li>Improved respawn cleanup/destroy checks to prevent duplicates</li>
+    </ul>
+
+    <ul class="lang kr">
+      <li>수집 대상(currentTarget) 단일화</li>
+      <li>수집 처리 파이프라인 순서 고정</li>
+      <li>리젠 타이밍에서 정리/Destroy 체크 강화로 중복 생성 방지</li>
+    </ul>
+
+    <h3>
+      <span class="lang en">Outcome</span>
+      <span class="lang kr">성과</span>
+    </h3>
+
+    <p class="lang en">
+      The AR collection experience became more reliable, and duplicate or inconsistent states were significantly reduced.
+    </p>
+
+    <p class="lang kr">
+      AR 수집 경험이 안정화되었고, 중복/불일치 버그가 크게 감소했습니다.
+    </p>
+
+    <hr />
+
+    <!-- Other Implementations -->
+    <h2>
+      <span class="lang en">Other Implementations (Brief)</span>
+      <span class="lang kr">기타 구현 (요약)</span>
+    </h2>
+
+    <ul class="lang en">
+      <li>Collection UI and 3D preview</li>
+      <li>Item shop, inventory, and currency flow</li>
+      <li>UI state transitions and onboarding popup</li>
+    </ul>
+
+    <ul class="lang kr">
+      <li>도감(컬렉션) UI 및 3D 프리뷰</li>
+      <li>상점/인벤토리/재화 흐름</li>
+      <li>UI 전환 및 온보딩 팝업</li>
+    </ul>
+
+    <hr />
+
+    <!-- Links -->
+    <h2>
+      <span class="lang en">Links</span>
+      <span class="lang kr">링크</span>
+    </h2>
+
+    <p class="lang en">
+      Technical Write-up: <a href="#" target="_blank" rel="noopener">Your GitHub Pages URL</a><br />
+      Team Repository: <a href="#" target="_blank" rel="noopener">Your Team Repo URL</a><br />
+      (Optional) Portfolio PPT: <a href="#" target="_blank" rel="noopener">Your PPT URL</a>
+    </p>
+
+    <p class="lang kr">
+      기술 정리(GitHub Pages): <a href="#" target="_blank" rel="noopener">본인 GitHub Pages URL</a><br />
+      팀 레포: <a href="#" target="_blank" rel="noopener">팀 레포 URL</a><br />
+      (선택) 포트폴리오 PPT: <a href="#" target="_blank" rel="noopener">PPT URL</a>
+    </p>
+
+    <div class="footer">
+      <span class="lang en">Last updated: <span id="last-updated"></span></span>
+      <span class="lang kr">마지막 업데이트: <span id="last-updated-kr"></span></span>
+    </div>
+  </div>
+<script src="../assets/js/main.js"></script>
 </body>
 </html>
-<h1>Friends! Noonsong – Technical Write-up</h1>
-<h2>Unity Client | Team Project</h2>
-<hr />
-
-<p>
-This page provides a deeper explanation of the key technical challenges I handled
-in the project, focusing on system integration and problem-solving.
-</p>
-
-<hr />
-
-<h2>1. Integrating GPS-based Spawn System with AR Collection</h2>
-
-<h3>Background</h3>
-<p>
-The project already had a GPS-based spawn system implemented by a teammate.
-Objects were spawned based on building areas, while AR collection and the
-collection system were developed separately.
-Integrating these independent systems into a single gameplay flow was the main challenge.
-</p>
-
-<h3>Understanding the Existing Spawn Logic</h3>
-<p>
-Buildings were divided into rectangular zones.
-When the player entered a zone, the corresponding spawn script became active
-and spawned objects specific to that building.
-Each character was defined as a ScriptableObject with metadata, including its spawn location.
-</p>
-
-<h3>My Role</h3>
-<p>
-I analyzed the existing spawn logic and added interfaces needed for integration:
-</p>
-<ul>
-  <li>Added a function to return the current building name when entering a zone</li>
-  <li>Implemented filtering logic to retrieve spawnable characters based on building name</li>
-  <li>Connected spawn data with AR collection and the collection system</li>
-</ul>
-
-<h3>Core Problem</h3>
-<p>
-Although objects were spawning correctly, multiple issues appeared during AR interaction:
-</p>
-<ul>
-  <li>Objects visible on screen could not be collected</li>
-  <li>Collected objects were added to the collection but remained in the world</li>
-  <li>Duplicate spawns occurred due to timing mismatches</li>
-  <li>Incorrect scale or rotation in AR view</li>
-</ul>
-
-<h3>Solution</h3>
-<p>
-To stabilize the integration, I focused on unifying interaction and state handling:
-</p>
-<ul>
-  <li>Introduced screen-visibility-based targeting for AR collection</li>
-  <li>Mapped spawned GameObjects directly to their data entries</li>
-  <li>Standardized the collection flow (collect → register → remove → update UI)</li>
-  <li>Added destruction checks to prevent duplicate spawns</li>
-</ul>
-
-<h3>Result</h3>
-<p>
-The spawn, AR collection, and collection systems were successfully unified into
-a single, stable gameplay flow.
-This significantly improved AR interaction reliability and reduced state-related bugs.
-</p>
-
-<hr />
-
-<h2>2. Stabilizing AR Collection After Beta Test</h2>
-
-<h3>Issues Found During Beta</h3>
-<p>
-After the beta release, several issues were reported during real-world usage:
-</p>
-<ul>
-  <li>Objects appeared on screen but were not collectible</li>
-  <li>Duplicate objects appeared after respawn cycles</li>
-  <li>Collection state and world state became inconsistent</li>
-</ul>
-
-<h3>Root Cause</h3>
-<p>
-The core issue was that multiple systems managed object state independently,
-which caused inconsistencies in AR environments.
-</p>
-
-<h3>Fixes Applied</h3>
-<ul>
-  <li>Unified collection target management</li>
-  <li>Fixed the order of collection processing</li>
-  <li>Improved spawn cleanup logic during respawn intervals</li>
-</ul>
-
-<h3>Outcome</h3>
-<p>
-AR collection became more stable, and duplicate or inconsistent states were eliminated.
-The fixes significantly improved the overall user experience during gameplay.
-</p>
-
-<hr />
-
-<h2>Other Implementations (Brief)</h2>
-<ul>
-  <li>Collection UI and 3D preview system</li>
-  <li>Item shop and currency management</li>
-  <li>Inventory synchronization</li>
-</ul>
-
-<hr />
-
-<h2>Links</h2>
-<p>
-Team Repository: (link)<br />
-Portfolio PPT: (link)
-</p>
