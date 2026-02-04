@@ -1,28 +1,117 @@
-<h1>Unity Client Developer</h1>
-<h2>Problem-solving focused portfolio</h2>
+<h1>Friends Noonsong – Technical Write-up</h1>
+<h2>Unity Client | Team Project</h2>
 <hr />
 
-<h3>Friends Noonsong</h3>
 <p>
-GPS 기반 AR 수집 게임 (Team Project)<br />
-담당: AR 수집 로직, 스폰 시스템 연동, 도감 데이터 연결 및 베타 안정화
+This page provides a deeper explanation of the key technical challenges I handled
+in the project, focusing on system integration and problem-solving.
 </p>
 
-<h3>Key Experience 1 — Integrating Spawn System with AR Collection</h3>
+<hr />
+
+<h2>1. Integrating GPS-based Spawn System with AR Collection</h2>
+
+<h3>Background</h3>
 <p>
-동료가 구현한 GPS 기반 스폰 시스템을 분석하고,<br />
-AR 화면에서 인식 가능한 오브젝트만 수집되도록 가시성 판별 로직을 구현.<br />
-스폰된 오브젝트를 도감 데이터와 매핑하여 수집 → 도감 등록 흐름을 안정화함.
+The project already had a GPS-based spawn system implemented by a teammate.
+Objects were spawned based on building areas, while AR collection and the
+collection system were developed separately.
+Integrating these independent systems into a single gameplay flow was the main challenge.
 </p>
 
-<h3>Key Experience 2 — Stabilizing AR Collection after Beta Test</h3>
+<h3>Understanding the Existing Spawn Logic</h3>
 <p>
-베타 테스트 이후 중복 수집, 상태 불일치, 인식 오류 등의 문제가 발생.<br />
-수집 타겟 단일화와 처리 순서 정리를 통해 AR 수집 시스템을 안정화함.
+Buildings were divided into rectangular zones.
+When the player entered a zone, the corresponding spawn script became active
+and spawned objects specific to that building.
+Each character was defined as a ScriptableObject with metadata, including its spawn location.
 </p>
 
-<h3>Links</h3>
+<h3>My Role</h3>
 <p>
-GitHub Pages (Technical Write-up)<br />
-Team Repository
+I analyzed the existing spawn logic and added interfaces needed for integration:
+</p>
+<ul>
+  <li>Added a function to return the current building name when entering a zone</li>
+  <li>Implemented filtering logic to retrieve spawnable characters based on building name</li>
+  <li>Connected spawn data with AR collection and the collection system</li>
+</ul>
+
+<h3>Core Problem</h3>
+<p>
+Although objects were spawning correctly, multiple issues appeared during AR interaction:
+</p>
+<ul>
+  <li>Objects visible on screen could not be collected</li>
+  <li>Collected objects were added to the collection but remained in the world</li>
+  <li>Duplicate spawns occurred due to timing mismatches</li>
+  <li>Incorrect scale or rotation in AR view</li>
+</ul>
+
+<h3>Solution</h3>
+<p>
+To stabilize the integration, I focused on unifying interaction and state handling:
+</p>
+<ul>
+  <li>Introduced screen-visibility-based targeting for AR collection</li>
+  <li>Mapped spawned GameObjects directly to their data entries</li>
+  <li>Standardized the collection flow (collect → register → remove → update UI)</li>
+  <li>Added destruction checks to prevent duplicate spawns</li>
+</ul>
+
+<h3>Result</h3>
+<p>
+The spawn, AR collection, and collection systems were successfully unified into
+a single, stable gameplay flow.
+This significantly improved AR interaction reliability and reduced state-related bugs.
+</p>
+
+<hr />
+
+<h2>2. Stabilizing AR Collection After Beta Test</h2>
+
+<h3>Issues Found During Beta</h3>
+<p>
+After the beta release, several issues were reported during real-world usage:
+</p>
+<ul>
+  <li>Objects appeared on screen but were not collectible</li>
+  <li>Duplicate objects appeared after respawn cycles</li>
+  <li>Collection state and world state became inconsistent</li>
+</ul>
+
+<h3>Root Cause</h3>
+<p>
+The core issue was that multiple systems managed object state independently,
+which caused inconsistencies in AR environments.
+</p>
+
+<h3>Fixes Applied</h3>
+<ul>
+  <li>Unified collection target management</li>
+  <li>Fixed the order of collection processing</li>
+  <li>Improved spawn cleanup logic during respawn intervals</li>
+</ul>
+
+<h3>Outcome</h3>
+<p>
+AR collection became more stable, and duplicate or inconsistent states were eliminated.
+The fixes significantly improved the overall user experience during gameplay.
+</p>
+
+<hr />
+
+<h2>Other Implementations (Brief)</h2>
+<ul>
+  <li>Collection UI and 3D preview system</li>
+  <li>Item shop and currency management</li>
+  <li>Inventory synchronization</li>
+</ul>
+
+<hr />
+
+<h2>Links</h2>
+<p>
+Team Repository: (link)<br />
+Portfolio PPT: (link)
 </p>
